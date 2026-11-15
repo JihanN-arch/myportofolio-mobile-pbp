@@ -87,3 +87,27 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  fonts:
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk-Regular.ttf
+        - asset: assets/fonts/SpaceGrotesk-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/SpaceGrotesk-Bold.ttf
+          weight: 700
+    - family: PermanentMarker
+      fonts:
+        - asset: assets/fonts/PermanentMarker-Regular.ttf
+    - family: Audiowide
+      fonts:
+        - asset: assets/fonts/Audiowide-Regular.ttf
+    - family: Limelight
+      fonts:
+        - asset: assets/fonts/Limelight-Regular.ttf
+    - family: ProtestRevolution
+      fonts:
+        - asset: assets/fonts/ProtestRevolution-Regular.ttf
+    - family: RubikGlitch
+      fonts:
+        - asset: assets/fonts/RubikGlitch-Regular.ttf
