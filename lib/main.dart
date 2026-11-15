@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
+        fontFamily: 'SpaceGrotesk',
         scaffoldBackgroundColor: AppColors.black,
         // ngikutin color portofolio web
         colorScheme: const ColorScheme.dark(
