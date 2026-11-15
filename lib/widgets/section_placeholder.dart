@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/app_colors.dart';
+import 'package:myportofolio_mobile/app_text_styles.dart';
 
 /// Halaman sementara untuk setiap bagian portofolio.
 /// ntar isinya diganti dengan daftar data dan fitur CRUD.
@@ -29,10 +30,8 @@ class SectionPlaceholder extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
-        ),
+        title: Text(title, style: AppTextStyles.logo),
+        titleSpacing: 0,
         backgroundColor: AppColors.black,
         foregroundColor: AppColors.white,
         scrolledUnderElevation: 0,

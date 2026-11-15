@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/app_colors.dart';
+import 'package:myportofolio_mobile/app_text_styles.dart';
 import 'package:myportofolio_mobile/screens/experience_page.dart';
 import 'package:myportofolio_mobile/screens/expertise_page.dart';
 import 'package:myportofolio_mobile/screens/project_page.dart';
@@ -42,14 +43,14 @@ class MyHomePage extends StatelessWidget {
   final String kelas = "PBP C";
 
   final List<ItemHomepage> items = const [
-    // projek
+    // projects
     ItemHomepage(
       "Lihat Projects",
       Icons.folder_rounded,
       AppColors.red,
       page: ProjectsPage(),
     ),
-    // experise
+    // expertise
     ItemHomepage(
       "Lihat Expertise",
       Icons.bolt_rounded,
@@ -65,7 +66,6 @@ class MyHomePage extends StatelessWidget {
       foregroundColor: AppColors.black,
       page: ExperiencePage(),
     ),
-
     // logout
     ItemHomepage(
       "Logout",
@@ -80,10 +80,7 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'JIHAN',
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 4),
-        ),
+        title: const Text('JIHAN', style: AppTextStyles.logo),
         backgroundColor: AppColors.black,
         foregroundColor: AppColors.white,
         scrolledUnderElevation: 0,
@@ -101,7 +98,7 @@ class MyHomePage extends StatelessWidget {
             HeroSection(name: nama),
             const SizedBox(height: 24),
 
-            // Tiga IngfoCard
+            // Tiga InfoCard
             IntrinsicHeight(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -125,11 +122,7 @@ class MyHomePage extends StatelessWidget {
             const Text(
               'MENU',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.muted,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 4,
-              ),
+              style: AppTextStyles.sectionLabel,
             ),
             const SizedBox(height: 12),
 
@@ -160,7 +153,7 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
-///   Hero section ikutin web
+/// Hero section, ikutin tampilan web.
 class HeroSection extends StatelessWidget {
   final String name;
 
@@ -174,23 +167,10 @@ class HeroSection extends StatelessWidget {
         const Text(
           'HEY, MY NAME IS....',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: AppColors.green,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
-          ),
+          style: AppTextStyles.eyebrow,
         ),
         const SizedBox(height: 8),
-        Text(
-          name,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppColors.red,
-            fontSize: 30,
-            fontWeight: FontWeight.w900,
-            height: 1.1,
-          ),
-        ),
+        Text(name, textAlign: TextAlign.center, style: AppTextStyles.h1),
         const SizedBox(height: 20),
         // Foto profil
         Center(
@@ -216,11 +196,7 @@ class HeroSection extends StatelessWidget {
         const SizedBox(height: 28),
         const Text.rich(
           TextSpan(
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 3,
-            ),
+            style: AppTextStyles.tagline,
             children: [
               TextSpan(
                 text: 'RESISTANT. ',
@@ -243,7 +219,7 @@ class HeroSection extends StatelessWidget {
   }
 }
 
-/// Kartu kecil buat nampilininformasi profil
+/// Kartu kecil buat nampilin informasi profil.
 class InfoCard extends StatelessWidget {
   final String title;
   final String content;
