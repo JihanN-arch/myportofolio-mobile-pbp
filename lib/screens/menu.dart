@@ -3,35 +3,15 @@ import 'package:myportofolio_mobile/app_colors.dart';
 import 'package:myportofolio_mobile/app_text_styles.dart';
 import 'package:myportofolio_mobile/screens/experience_page.dart';
 import 'package:myportofolio_mobile/screens/expertise_page.dart';
+import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/project_page.dart';
+import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:myportofolio_mobile/widgets/project_card.dart';
 
 //!! AI ATTRIBUTION & ASSISTANCE
 //!! - UI Styling & Widget Design : Assisted by Claude AI for visual styling & layout refinement
 //!! - Code Refactoring           : Claude AI-assisted optimization for widget hierarchy & relationships
 //!! - Logic & Flow Debugging     : Assisted by Claude AI for troubleshooting application logic
-
-/// Model untuk setiap tombol aksi di halaman utama.
-class ItemHomepage {
-  final String name;
-  final IconData icon;
-
-  final Color color;
-
-  final Color foregroundColor;
-
-  final Color? borderColor;
-
-  final Widget? page;
-
-  const ItemHomepage(
-    this.name,
-    this.icon,
-    this.color, {
-    this.foregroundColor = AppColors.white,
-    this.borderColor,
-    this.page,
-  });
-}
 
 // Halaman utama
 class MyHomePage extends StatelessWidget {
@@ -66,6 +46,14 @@ class MyHomePage extends StatelessWidget {
       foregroundColor: AppColors.black,
       page: ExperiencePage(),
     ),
+    // tambah project -> halaman form
+    ItemHomepage(
+      "Tambah Project",
+      Icons.add_circle_rounded,
+      AppColors.white,
+      foregroundColor: AppColors.black,
+      page: ProjectFormPage(),
+    ),
     // logout
     ItemHomepage(
       "Logout",
@@ -88,6 +76,7 @@ class MyHomePage extends StatelessWidget {
           bottom: BorderSide(color: AppColors.red, width: 1.5),
         ),
       ),
+      drawer: const LeftDrawer(),
       // SingleChildScrollView biar halaman bisa digulir
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -252,70 +241,6 @@ class InfoCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Kartu tombol aksi. Warna dan perilakunya diatur lewat [ItemHomepage].
-class ItemCard extends StatelessWidget {
-  final ItemHomepage item;
-
-  const ItemCard(this.item, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final borderColor = item.borderColor;
-
-    return Material(
-      // Warna latar diambil dari atribut color milik ItemHomepage.
-      color: item.color,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
-        side: borderColor == null
-            ? BorderSide.none
-            : BorderSide(color: borderColor, width: 1.5),
-      ),
-      child: InkWell(
-        onTap: () {
-          // Menampilkan SnackBar sesuai nama tombol yang ditekan.
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text("Kamu telah menekan tombol ${item.name}!"),
-              ),
-            );
-
-          // Pindah ke halaman tujuan jika tombol punya halaman.
-          final page = item.page;
-          if (page != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => page),
-            );
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(item.icon, color: item.foregroundColor, size: 30),
-              const SizedBox(height: 6),
-              Text(
-                item.name,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: item.foregroundColor,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
