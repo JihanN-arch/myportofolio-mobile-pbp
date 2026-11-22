@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/app_colors.dart';
 import 'package:myportofolio_mobile/app_text_styles.dart';
 import 'package:myportofolio_mobile/screens/experience_page.dart';
@@ -51,8 +51,9 @@ class MyHomePage extends StatelessWidget {
     ItemHomepage(
       "Tambah Project",
       Icons.add_circle_rounded,
-      AppColors.white,
-      foregroundColor: AppColors.black,
+      AppColors.carbonBlack,
+      foregroundColor: AppColors.red,
+      borderColor: AppColors.red,
       page: ProjectFormPage(),
     ),
     // tambah experience -> halaman form
