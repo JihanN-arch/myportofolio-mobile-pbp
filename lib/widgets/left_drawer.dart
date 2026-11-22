@@ -5,6 +5,9 @@ import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 
+//!! AI ATTRIBUTION & ASSISTANCE
+//!! - UI Styling & Widget Design : Assisted by Claude AI for layout refinement
+
 enum DrawerDestination { home, addProject, addExperience }
 
 class LeftDrawer extends StatelessWidget {
