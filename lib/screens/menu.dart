@@ -7,6 +7,7 @@ import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/project_page.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 import 'package:myportofolio_mobile/widgets/project_card.dart';
+import 'package:myportofolio_mobile/screens/experience_form.dart';
 
 //!! AI ATTRIBUTION & ASSISTANCE
 //!! - UI Styling & Widget Design : Assisted by Claude AI for visual styling & layout refinement
@@ -53,6 +54,15 @@ class MyHomePage extends StatelessWidget {
       AppColors.white,
       foregroundColor: AppColors.black,
       page: ProjectFormPage(),
+    ),
+    // tambah experience -> halaman form
+    ItemHomepage(
+      "Tambah Experience",
+      Icons.add_task_rounded,
+      AppColors.carbonBlack,
+      foregroundColor: AppColors.green,
+      borderColor: AppColors.green,
+      page: ExperienceFormPage(),
     ),
     // logout
     ItemHomepage(
