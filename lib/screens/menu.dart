@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/app_colors.dart';
 import 'package:myportofolio_mobile/app_text_styles.dart';
 import 'package:myportofolio_mobile/screens/experience_page.dart';
@@ -7,6 +7,7 @@ import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/project_page.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 import 'package:myportofolio_mobile/widgets/project_card.dart';
+import 'package:myportofolio_mobile/screens/experience_form.dart';
 
 //!! AI ATTRIBUTION & ASSISTANCE
 //!! - UI Styling & Widget Design : Assisted by Claude AI for visual styling & layout refinement
@@ -50,9 +51,19 @@ class MyHomePage extends StatelessWidget {
     ItemHomepage(
       "Tambah Project",
       Icons.add_circle_rounded,
-      AppColors.white,
-      foregroundColor: AppColors.black,
+      AppColors.carbonBlack,
+      foregroundColor: AppColors.red,
+      borderColor: AppColors.red,
       page: ProjectFormPage(),
+    ),
+    // tambah experience -> halaman form
+    ItemHomepage(
+      "Tambah Experience",
+      Icons.add_task_rounded,
+      AppColors.carbonBlack,
+      foregroundColor: AppColors.green,
+      borderColor: AppColors.green,
+      page: ExperienceFormPage(),
     ),
     // logout
     ItemHomepage(
