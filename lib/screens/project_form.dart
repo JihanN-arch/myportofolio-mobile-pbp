@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:myportofolio_mobile/app_colors.dart';
 import 'package:myportofolio_mobile/app_text_styles.dart';
+import 'package:myportofolio_mobile/widgets/form_decoration.dart';
+import 'package:myportofolio_mobile/widgets/form_dialogs.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
 /// Halaman form untuk menambahkan project baru.
@@ -33,17 +35,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
 
   /// Dekorasi input yang sama untuk semua field, agar tidak ditulis berulang.
   InputDecoration _inputDecoration(String label, {String? hint}) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      border: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-      ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: AppColors.red, width: 1.5),
-      ),
-    );
+    return appInputDecoration(label, accent: AppColors.red, hint: hint);
   }
 
   /// Cek apakah teks adalah URL http(s) yang valid.
@@ -78,8 +70,47 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
 
   String _orDash(String value) => value.isEmpty ? "-" : value;
 
+  bool get _isDirty =>
+      _title.isNotEmpty ||
+      _image.isNotEmpty ||
+      _githubUrl.isNotEmpty ||
+      _demoUrl.isNotEmpty ||
+      _year != null ||
+      _category != _defaultCategory;
+
+  void _showSummaryDialog() {
+    showSummaryDialog(
+      context,
+      title: 'Project berhasil ditambahkan!',
+      accent: AppColors.red,
+      items: [
+        SummaryItem(Icons.folder_outlined, 'Nama Project', _title),
+        SummaryItem(
+          Icons.category_outlined,
+          'Kategori',
+          _categories[_category] ?? _category,
+        ),
+        SummaryItem(Icons.calendar_today_outlined, 'Tahun', '${_year ?? "-"}'),
+        SummaryItem(Icons.image_outlined, 'Gambar', _orDash(_image)),
+        SummaryItem(Icons.code_rounded, 'GitHub', _orDash(_githubUrl)),
+        SummaryItem(Icons.open_in_new_rounded, 'Demo', _orDash(_demoUrl)),
+      ],
+      onClose: _resetForm,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    return PopScope(
+      canPop: !_isDirty,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) confirmLeaveForm(context);
+      },
+      child: _buildPage(context),
+    );
+  }
+
+  Widget _buildPage(BuildContext context) {
     final currentYear = DateTime.now().year;
 
     return Scaffold(
@@ -93,7 +124,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
           bottom: BorderSide(color: AppColors.red, width: 1.5),
         ),
       ),
-      drawer: const LeftDrawer(),
+      drawer: const LeftDrawer(current: DrawerDestination.addProject),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -129,21 +160,14 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
               // === Kategori ===
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: DropdownButtonFormField<String>(
-                  decoration: _inputDecoration("Kategori"),
-                  dropdownColor: AppColors.carbonBlack,
-                  initialValue: _category,
-                  items: _categories.entries
-                      .map(
-                        (entry) => DropdownMenuItem(
-                          value: entry.key,
-                          child: Text(entry.value),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (String? newValue) {
+                child: AppSelectField(
+                  label: "Kategori",
+                  accent: AppColors.red,
+                  options: _categories,
+                  value: _category,
+                  onChanged: (String newValue) {
                     setState(() {
-                      _category = newValue!;
+                      _category = newValue;
                     });
                   },
                 ),
@@ -237,61 +261,54 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                 ),
               ),
 
-              // === Tombol Simpan ===
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.red,
-                      foregroundColor: AppColors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 14,
+              // === Tombol Batal dan Simpan ===
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.white,
+                        side: const BorderSide(color: AppColors.muted),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 14,
+                        ),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
                       ),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      onPressed: () => cancelForm(context, isDirty: _isDirty),
+                      child: const Text(
+                        "Batal",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text(
-                                'Project berhasil ditambahkan!',
-                              ),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Nama Project: $_title'),
-                                    Text('Kategori: ${_categories[_category]}'),
-                                    Text('Tahun: ${_year ?? "-"}'),
-                                    Text('Gambar: ${_orDash(_image)}'),
-                                    Text('GitHub: ${_orDash(_githubUrl)}'),
-                                    Text('Demo: ${_orDash(_demoUrl)}'),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _resetForm();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                    },
-                    child: const Text("Save"),
-                  ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.red,
+                        foregroundColor: AppColors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 14,
+                        ),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
+                      ),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _showSummaryDialog();
+                        }
+                      },
+                      child: const Text(
+                        "Simpan",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
