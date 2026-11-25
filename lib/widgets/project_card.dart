@@ -1,22 +1,23 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/app_colors.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
+import 'package:provider/provider.dart';
 
 /// Model untuk setiap tombol aksi di halaman utama.
 class ItemHomepage {
   final String name;
   final IconData icon;
-
-  /// Warna latar kartu tombol.
   final Color color;
-
-  /// Warna ikon dan teks agar tetap terbaca di atas [color].
   final Color foregroundColor;
-
-  /// Warna garis tepi kartu (null = tanpa garis tepi).
   final Color? borderColor;
-
-  /// Halaman tujuan saat tombol ditekan (null = hanya SnackBar).
   final Widget? page;
+
+  /// True jika halaman tujuan hanya boleh dibuka setelah login.
+  final bool requiresLogin;
+
+  /// True untuk tombol Logout.
+  final bool isLogout;
 
   const ItemHomepage(
     this.name,
@@ -25,21 +26,57 @@ class ItemHomepage {
     this.foregroundColor = AppColors.white,
     this.borderColor,
     this.page,
+    this.requiresLogin = false,
+    this.isLogout = false,
   });
 }
 
-/// Kartu tombol aksi. Warna dan perilakunya diatur lewat [ItemHomepage].
 class ItemCard extends StatelessWidget {
   final ItemHomepage item;
 
   const ItemCard(this.item, {super.key});
+
+  void _showSnackBar(ScaffoldMessengerState messenger, String message) {
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final auth = context.read<AuthState>();
+
+    if (!auth.isLoggedIn) {
+      _showSnackBar(messenger, 'Kamu belum login.');
+      return;
+    }
+    await auth.logout();
+    _showSnackBar(messenger, 'Berhasil logout. Sampai jumpa!');
+  }
+
+  Future<void> _onTap(BuildContext context) async {
+    if (item.isLogout) {
+      await _logout(context);
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    _showSnackBar(messenger, "Kamu telah menekan tombol ${item.name}!");
+
+    final page = item.page;
+    if (page == null) return;
+
+    if (item.requiresLogin && !await ensureLoggedIn(context)) return;
+
+    navigator.push(MaterialPageRoute(builder: (context) => page));
+  }
 
   @override
   Widget build(BuildContext context) {
     final borderColor = item.borderColor;
 
     return Material(
-      // Warna latar diambil dari atribut color milik ItemHomepage.
       color: item.color,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
@@ -49,26 +86,7 @@ class ItemCard extends StatelessWidget {
             : BorderSide(color: borderColor, width: 1.5),
       ),
       child: InkWell(
-        onTap: () {
-          // Menampilkan SnackBar sesuai nama tombol yang ditekan.
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text("Kamu telah menekan tombol ${item.name}!"),
-              ),
-            );
-
-          // Pindah ke halaman tujuan jika tombol punya halaman.
-          // Navigator.push agar pengguna bisa kembali dengan tombol Back.
-          final page = item.page;
-          if (page != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => page),
-            );
-          }
-        },
+        onTap: () => _onTap(context),
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(

@@ -55,6 +55,7 @@ class MyHomePage extends StatelessWidget {
       foregroundColor: AppColors.red,
       borderColor: AppColors.red,
       page: ProjectFormPage(),
+      requiresLogin: true,
     ),
     // tambah experience -> halaman form
     ItemHomepage(
@@ -64,6 +65,7 @@ class MyHomePage extends StatelessWidget {
       foregroundColor: AppColors.green,
       borderColor: AppColors.green,
       page: ExperienceFormPage(),
+      requiresLogin: true,
     ),
     // logout
     ItemHomepage(
@@ -72,6 +74,7 @@ class MyHomePage extends StatelessWidget {
       AppColors.carbonBlack,
       foregroundColor: AppColors.pinkRed,
       borderColor: AppColors.pinkRed,
+      isLogout: true,
     ),
   ];
 
