@@ -1,10 +1,15 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/app_colors.dart';
 import 'package:myportofolio_mobile/app_text_styles.dart';
+import 'package:myportofolio_mobile/models/project.dart';
+import 'package:myportofolio_mobile/services/api_client.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/form_decoration.dart';
 import 'package:myportofolio_mobile/widgets/form_dialogs.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:provider/provider.dart';
 
 /// Halaman form untuk menambahkan project baru.
 /// Field dan validasinya mengikuti model Project di API Django (/api/v1/projects/).
@@ -32,6 +37,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
   String _demoUrl = "";
   int? _year;
   String _category = _defaultCategory;
+  bool _isSubmitting = false;
 
   /// Dekorasi input yang sama untuk semua field, agar tidak ditulis berulang.
   InputDecoration _inputDecoration(String label, {String? hint}) {
@@ -68,8 +74,6 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
     });
   }
 
-  String _orDash(String value) => value.isEmpty ? "-" : value;
-
   bool get _isDirty =>
       _title.isNotEmpty ||
       _image.isNotEmpty ||
@@ -78,25 +82,94 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
       _year != null ||
       _category != _defaultCategory;
 
-  void _showSummaryDialog() {
+  String? _nullIfEmpty(String value) => value.isEmpty ? null : value;
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Menampilkan ringkasan data yang sudah tersimpan di server.
+  void _showSummaryDialog(Project project) {
     showSummaryDialog(
       context,
       title: 'Project berhasil ditambahkan!',
       accent: AppColors.red,
       items: [
-        SummaryItem(Icons.folder_outlined, 'Nama Project', _title),
+        SummaryItem(Icons.folder_outlined, 'Nama Project', project.title),
         SummaryItem(
           Icons.category_outlined,
           'Kategori',
-          _categories[_category] ?? _category,
+          project.categoryDisplay.isEmpty
+              ? (_categories[project.category] ?? project.category)
+              : project.categoryDisplay,
         ),
-        SummaryItem(Icons.calendar_today_outlined, 'Tahun', '${_year ?? "-"}'),
-        SummaryItem(Icons.image_outlined, 'Gambar', _orDash(_image)),
-        SummaryItem(Icons.code_rounded, 'GitHub', _orDash(_githubUrl)),
-        SummaryItem(Icons.open_in_new_rounded, 'Demo', _orDash(_demoUrl)),
+        SummaryItem(
+          Icons.calendar_today_outlined,
+          'Tahun',
+          '${project.year ?? "-"}',
+        ),
+        SummaryItem(Icons.image_outlined, 'Gambar', project.image ?? '-'),
+        SummaryItem(Icons.code_rounded, 'GitHub', project.githubUrl ?? '-'),
+        SummaryItem(Icons.open_in_new_rounded, 'Demo', project.demoUrl ?? '-'),
       ],
       onClose: _resetForm,
     );
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final loggedIn = await ensureLoggedIn(context);
+    if (!loggedIn || !mounted) return;
+
+    final apiClient = context.read<ApiClient>();
+    final auth = context.read<AuthState>();
+    final token = auth.token;
+    if (token == null) return;
+
+    final newProject = Project(
+      title: _title,
+      category: _category,
+      year: _year,
+      image: _nullIfEmpty(_image),
+      githubUrl: _nullIfEmpty(_githubUrl),
+      demoUrl: _nullIfEmpty(_demoUrl),
+    );
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      final created = await apiClient.createProject(newProject, token: token);
+      if (!mounted) return;
+      _showSummaryDialog(created);
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        // Token sudah tidak berlaku: logout, lalu minta login ulang.
+        await auth.logout();
+        if (!mounted) return;
+        _showSnackBar(e.userMessage);
+        final again = await ensureLoggedIn(context);
+        if (again && mounted) {
+          _showSnackBar('Login berhasil. Tekan Simpan sekali lagi.');
+        }
+      } else {
+        if (!mounted) return;
+        _showSnackBar(e.userMessage);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      _showSnackBar('Tidak bisa terhubung ke server.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
@@ -290,6 +363,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.red,
                         foregroundColor: AppColors.white,
+                        disabledBackgroundColor: AppColors.red.withAlpha(120),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 14,
@@ -298,15 +372,20 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                           borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
                       ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _showSummaryDialog();
-                        }
-                      },
-                      child: const Text(
-                        "Simpan",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      onPressed: _isSubmitting ? null : _submit,
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.white,
+                              ),
+                            )
+                          : const Text(
+                              "Simpan",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                     ),
                   ],
                 ),
